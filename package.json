@@ -29,7 +29,8 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.0",
     "passport": "^0.6.0",
-    "passport-anonymous": "^1.0.1"
+    "passport-anonymous": "^1.0.1",
+    "socket.io": "^4.6.1"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",

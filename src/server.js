@@ -1,14 +1,27 @@
 import express, { json } from "express";
 import cors from "cors";
-import createHttpError from "http-errors";
 import { badRequestErrorHandler, conflictErrorHandler, forbiddenErrorHandler, genericErrorHandler, notFoundErrorHandler, unauthorizedErrorHandler } from "./errorHandlers.js";
 import mongoose from 'mongoose';
 import listEndpoints from "express-list-endpoints";
 import usersRouter from './api/users/index.js';
 import friendsRouter from "./api/friends/index.js";
+import http from "http";
+import {Server} from "socket.io";
+import createHttpError from "http-errors";
+import dotenv from "dotenv";
+import { newConnectionHandler } from "./socket/index.js";
+
+dotenv.config();
 
 const server = express();
 const port = process.env.PORT;
+
+//************************* SOCKET.IO **********************/
+
+const httpServer = http.createServer(server);
+const io = new Server(httpServer);
+
+io.on("connection", newConnectionHandler)
 
 //************************ MIDDLEWARES *********************/
 server.use(express.json());
@@ -49,7 +62,7 @@ mongoose.connect(process.env.MONGO_CONNECTION_URL)
 
 mongoose.connection.on("connected", () => {
     
-    server.listen(port, () => {
+    httpServer.listen(port, () => {
         console.table(listEndpoints(server));
         console.log("Server is running on port:", port)
     })

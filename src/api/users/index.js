@@ -1,7 +1,6 @@
 import express from "express";
 import UsersModel from "./model.js"
-import { passport } from 'passport';
-import { createHttpError } from 'http-errors';
+import createHttpError from 'http-errors';
 
 const usersRouter = express.Router();
 
