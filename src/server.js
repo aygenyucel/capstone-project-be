@@ -4,7 +4,8 @@ import createHttpError from "http-errors";
 import { badRequestErrorHandler, conflictErrorHandler, forbiddenErrorHandler, genericErrorHandler, notFoundErrorHandler, unauthorizedErrorHandler } from "./errorHandlers.js";
 import mongoose from 'mongoose';
 import listEndpoints from "express-list-endpoints";
-
+import usersRouter from './api/users/index.js';
+import friendsRouter from "./api/friends/index.js";
 
 const server = express();
 const port = process.env.PORT;
@@ -26,6 +27,9 @@ server.use(cors({
 
 
 //************************* ENDPOINTS **********************/
+
+server.use("/users", usersRouter)
+server.use("/friends", friendsRouter)
 
 
 //*********************** ERROR HANDLERS *******************/
