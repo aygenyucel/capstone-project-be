@@ -19,7 +19,7 @@ const port = process.env.PORT;
 //************************* SOCKET.IO **********************/
 
 const httpServer = http.createServer(server);
-const io = new Server(httpServer);
+export const io = new Server(httpServer);
 
 io.on("connection", newConnectionHandler)
 
