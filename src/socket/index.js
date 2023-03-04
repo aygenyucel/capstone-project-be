@@ -14,23 +14,46 @@ let otherUsersInThisRoom = [];
 
 //PeerJSGroupRoom
 let roomID = ''
+let currentUserID = ''
+let currentChatRooms = []
 
 export const newConnectionHandler = socket => {
-
+    
     const socketID = socket.id;
-
+    
     console.log("New connection:", socket.id)
-
+    
     socket.emit("clientId", socket.id)
+    
+    //*********************PeerJSGroupRoom **********************/
+    socket.on('join-room', payload => {
+        roomID = payload.roomID
+        currentUserID = payload.userID
+        currentChatRooms = payload.currentChatRooms
+        console.log("currentChatRooms",currentChatRooms)
+        // allUsersInTheRoom.push(payload.userID)
+        // socket.emit("all-users-in-room", allUsersInTheRoom)
+        socket.join(payload.roomID)
+        socket.to(payload.roomID).emit('user-connected', {userID: payload.userID})
+        
+    })
+    
+    socket.on("disconnect", () => {
+        console.log("Client disconnected, socket.id:" , socket.id)
+        
+    //*********************PeerJSGroupRoom **********************/
+        socket.to(roomID).emit('user-disconnect', {socketID: socketID, userID: currentUserID});
 
-    socket.on("usersOnCall", payload => {
-            usersOnCall.push({socketId: payload});
-            socket.emit("updateUsersOnCall", usersOnCall)
-            socket.broadcast.emit("updateUsersOnCall", usersOnCall)
+    //****************** SimplePeerRoom Component******************/
+        const roomIndex = chatRooms.findIndex((room) => room.roomID === currentRoomID);
+        if (roomIndex !== -1) {
+            const updatedUsers = (chatRooms[roomIndex].users).filter((userID) => userID !== socketID)
+            chatRooms[roomIndex].users = updatedUsers
+        }
+        
     })
 
-    //****************** simple-peer(SimplePeerRoom Component) ******************/
-
+    //****************** SimplePeerRoom Component******************/
 
     socket.on("joinRoom", roomID => {
         const roomIndex = chatRooms.findIndex(room => room.roomID === roomID)
@@ -49,6 +72,7 @@ export const newConnectionHandler = socket => {
         currentRoomID = roomID;
         console.log("you joined a room => currentRoomID: ", currentRoomID)
         console.log("your socket id is => socketID: ", socketID )
+        
     })
 
 
@@ -63,44 +87,5 @@ export const newConnectionHandler = socket => {
         io.to(payload.callerID).emit('receivingReturnedSignal', { signal: payload.signalData, id: socketID });
         console.log("---------------------------")
     })
-    
-
-
     //************************************* */
-    socket.on("disconnect", () => {
-        console.log("Client disconnected, socket.id:" , socket.id)
-        
-        // usersOnCall = usersOnCall.filter(user => user.socketId !== socket.id && "")
-        // socket.emit("updateUsersOnCall", usersOnCall)
-        // socket.broadcast.emit("updateUsersOnCall", usersOnCall)
-
-        
-        //******************* simplePeerRoom ********************/
-        
-        const roomIndex = chatRooms.findIndex((room) => room.roomID === currentRoomID);
-        if (roomIndex !== -1) {
-            const updatedUsers = (chatRooms[roomIndex].users).filter((userID) => userID !== socketID)
-            chatRooms[roomIndex].users = updatedUsers
-        }
-        
-        // console.log("chat rooms after disconnect => chatRooms: ", chatRooms)
-
-        /*********************PeerJSGroupRoom **********************/
-        // socket.to(roomID).emit('user-disconnected', {userID: socketID})
-
-    })
-
-    //*********************PeerJSGroupRoom **********************/
-    socket.on('join-room', payload => {
-        roomID = payload.roomID
-        // allUsersInTheRoom.push(payload.userID)
-        // socket.emit("all-users-in-room", allUsersInTheRoom)
-        socket.join(payload.roomID)
-        socket.to(payload.roomID).emit('user-connected', {userID: payload.userID})
-        
-    })
-
-
-
-
 }
