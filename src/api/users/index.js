@@ -101,8 +101,8 @@ usersRouter.post("/signup", async(req,res,next) => {
                 const newUser = new UsersModel(req.body);
                 const {_id} = await newUser.save();
                 const payload = {_id}
-                const jwtToken = await createJWTToken(payload);
-                res.status(201).send({jwtToken})
+                const JWTToken = await createJWTToken(payload);
+                res.status(201).send({JWTToken})
             }
         }
     } catch (error) {
@@ -127,5 +127,8 @@ usersRouter.post("/login", async(req,res,next) => {
         next(error)
     }
 })
+
+// usersRouter.delete("/logout", async (req,res,next) => {
+// })
 
 export default usersRouter;
