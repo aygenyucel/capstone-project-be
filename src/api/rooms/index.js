@@ -9,7 +9,7 @@ roomsRouter.post("/", async (req, res, next) => {
     try {
         const newRoom = new RoomsModel(req.body);
         const {_id} = await newRoom.save();
-        res.status(201).send(_id)
+        res.status(201).send(newRoom)
     } catch (error) {
         next(error)
     }
