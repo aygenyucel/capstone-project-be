@@ -10,6 +10,7 @@ import {Server} from "socket.io";
 import createHttpError from "http-errors";
 import dotenv from "dotenv";
 import { newConnectionHandler } from "./socket/index.js";
+import roomsRouter from "./api/rooms/index.js";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ server.use(cors({
 //************************* ENDPOINTS **********************/
 
 server.use("/users", usersRouter)
+server.use("/rooms", roomsRouter)
 server.use("/friends", friendsRouter)
 
 

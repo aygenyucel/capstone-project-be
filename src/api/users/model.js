@@ -7,6 +7,7 @@ const usersSchema = new Schema({
     email: {type: String, required: true},
     password: {type: String, required: true},
     friends: [{type: Schema.Types.ObjectId, ref: "Friend"}],
+    rooms: [{type: Schema.Types.ObjectId, ref: "Room"}]
 },
 {timestamps: true})
 
@@ -23,12 +24,12 @@ usersSchema.pre("save", async function(next) {
 })
 
 
-usersSchema.static("checkCredentials", async function (usernameOrEmail, password) {
+usersSchema.static("checkCredentials", async function (email, password) {
     const UserModel = this;
-    const user = await UserModel.findOne({usernameOrEmail});
+    const user = await UserModel.findOne({email});
     if(user) {
-        const passwordMatdh = await bcrypt.compare(password, user.password);
-        if(passwordMatdh) {
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if(passwordMatch) {
             return user;
         } else {
             return null;
@@ -38,5 +39,24 @@ usersSchema.static("checkCredentials", async function (usernameOrEmail, password
     }
 })
 
+usersSchema.static("checkEmail", async function (email) {
+    const UserModel = this
+    const user = await UserModel.findOne({email: email})
+    if(user){
+        return email;
+    } else {
+        return null
+    }
+})
+
+usersSchema.static("checkUsername", async function (username) {
+    const UserModel = this
+    const user = await UserModel.findOne({username: username})
+    if(user) {
+        return username;
+    } else {
+        return null;
+    }
+})
 
 export default model("User", usersSchema);

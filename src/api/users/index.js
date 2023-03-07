@@ -1,6 +1,8 @@
 import express from "express";
 import UsersModel from "./model.js"
 import createHttpError from 'http-errors';
+import { createJWTToken } from "../../lib/jwt-tools.js";
+import { JWTAuthMiddleware } from "../../lib/auth/JWTAuthMiddleware.js";
 
 const usersRouter = express.Router();
 
@@ -23,6 +25,17 @@ usersRouter.get("/", async(req, res, next) => {
         const users = await UsersModel.find({});
         res.send(users);
     } catch(error) {
+        next(error)
+    }
+})
+
+//get own profile after auth
+usersRouter.get("/me",JWTAuthMiddleware, async(req,res,next) => {
+    try {
+        const {_id} = req.user;
+        const user = await UsersModel.findById(_id);
+        res.send(user);
+    } catch (error) {
         next(error)
     }
 })
@@ -73,12 +86,49 @@ usersRouter.delete("/:userId", async (req,res,next) => {
     }
 })
 
+//user registiration
+usersRouter.post("/signup", async(req,res,next) => {
+    try {
+        const {email, username} = req.body;
+        const user = await UsersModel.checkEmail(email)
+        if(user) {
+            next(createHttpError(409, `The user with this email already exist!`))
+        } else {
+            const user = await UsersModel.checkUsername(username)
+            if(user) {
+                next(createHttpError(409, `The user with this username already exist!`))
+            } else {
+                const newUser = new UsersModel(req.body);
+                const {_id} = await newUser.save();
+                const payload = {_id}
+                const JWTToken = await createJWTToken(payload);
+                res.status(201).send({JWTToken})
+            }
+        }
+    } catch (error) {
+        next(error)
+    }
+})
 
-// usersRouter.post("/register", async(req,res,next) => {})
+//user login
+usersRouter.post("/login", async(req,res,next) => {
+    try {
+        const {email, password}  = req.body;
+        const user = await UsersModel.checkCredentials(email, password);
+        if(user){
+            const payload = {_id: user._id};
+            const JWTToken = await createJWTToken(payload);
+            //TODO: ADD REFRESH TOKEN INSTEAD OF
+            res.send({JWTToken})
+        } else {
+            next(createHttpError(404, "Credentials are not ok!"))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
 
-// usersRouter.post("/login", async(req,res,next) => {})
-
-//anonymous authentication
-// usersRouter.post("/anonymous", passport.authenticate("anonymous", {session: false}), async(req, res, next) => {})
+// usersRouter.delete("/logout", async (req,res,next) => {
+// })
 
 export default usersRouter;
