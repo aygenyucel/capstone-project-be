@@ -45,6 +45,7 @@ roomsRouter.get("/:roomID", async (req, res, next) => {
 //edit a room with id
 roomsRouter.put("/:roomID", async (req, res, next) => {
     try {
+        console.log("howwwwwwww")
         const updatedRoom = await RoomsModel.findByIdAndUpdate(req.params.roomID, {...req.body}, {runValidators: true, new: true})
 
         if(updatedRoom) {
@@ -70,6 +71,10 @@ roomsRouter.delete("/:roomID", async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+})
+
+//add new user to room
+roomsRouter.put("/:roomID/newUser", async (req, res, next) => {
 })
 
 export default roomsRouter;
