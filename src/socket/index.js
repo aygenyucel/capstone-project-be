@@ -4,7 +4,7 @@ import { io } from './../server.js';
 
 dotenv.config();
 
-let roomID = ''
+let roomEndpoint = ''
 let currentPeerID = ''
 
 export const newConnectionHandler = socket => {
@@ -17,20 +17,20 @@ export const newConnectionHandler = socket => {
     socket.emit("clientId", socketID)
 
     socket.on('join-room', payload => {
-        roomID = payload.roomID
+        roomEndpoint = payload.roomEndpoint
         currentPeerID = payload.peerID
-        socket.join(payload.roomID)
-        socket.to(payload.roomID).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID})
+        socket.join(payload.roomEndpoint)
+        socket.to(payload.roomEndpoint).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID})
         
         
         socket.on("disconnect", () => {
             console.log("Client disconnected, socketID:" , socketID, "peerID: ", payload.peerID)
-            // socket.to(roomID).emit('user-disconnect', {socketID: socketID, peerID: currentPeerID}); 
-            leaveRoom(payload.peerID, payload.roomID, payload.userID)
+            // socket.to(roomEndpoint).emit('user-disconnect', {socketID: socketID, peerID: currentPeerID}); 
+            leaveRoom(payload.peerID, payload.roomEndpoint, payload.userID)
         })
     })
-    const leaveRoom =(peerID, roomID, userID) => {
+    const leaveRoom =(peerID, roomEndpoint, userID) => {
         //todo: filter updated rooms
-        socket.to(roomID).emit('user-disconnected', {peerID: peerID, userID: userID})
+        socket.to(roomEndpoint).emit('user-disconnected', {peerID: peerID, userID: userID})
     }
 }
