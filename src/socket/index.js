@@ -4,9 +4,6 @@ import { io } from './../server.js';
 
 dotenv.config();
 
-const [roomEndpoint, setRoomEndpoint] = useState("")
-const [currentPeerID, setCurrentPeerID] = useState("")
-const [roomID, setRoomID] = useState("")
 const users = []
 
 export const newConnectionHandler = socket => {
@@ -18,9 +15,7 @@ export const newConnectionHandler = socket => {
     socket.emit("clientId", socketID)
 
     socket.on('join-room', payload => {
-        setRoomEndpoint(payload.roomEndpoint)
-        setCurrentPeerID(payload.peerID) 
-        setRoomID(payload.roomID)
+        
         socket.join(payload.roomEndpoint)
         socket.to(payload.roomEndpoint).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID})
         
