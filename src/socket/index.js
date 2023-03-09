@@ -15,7 +15,8 @@ export const newConnectionHandler = socket => {
     socket.emit("clientId", socketID)
 
     socket.on('join-room', payload => {
-        
+        const roomID = payload.roomID
+
         socket.join(payload.roomEndpoint)
         socket.to(payload.roomEndpoint).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID})
         
