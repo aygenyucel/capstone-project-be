@@ -3,7 +3,7 @@ import RoomsModel from "./model.js"
 import createHttpError from 'http-errors';
 
 const roomsRouter = express.Router()
-
+    
 //create a new room
 roomsRouter.post("/", async (req, res, next) => {
     try {
@@ -41,18 +41,17 @@ roomsRouter.get("/:roomID", async (req, res, next) => {
         next(error)
     }
 })
-
 //edit a room with id
 roomsRouter.put("/:roomID", async (req, res, next) => {
     try {
         const updatedRoom = await RoomsModel.findByIdAndUpdate(req.params.roomID, {...req.body}, {runValidators: true, new: true})
-
+        
         if(updatedRoom) {
             res.send(updatedRoom)
         } else {
             next(createHttpError(404, `The room with id ${req.params.roomID} not found!`))
         }
-
+        
     } catch (error) {
         next(error)
     }
@@ -71,5 +70,7 @@ roomsRouter.delete("/:roomID", async (req, res, next) => {
         next(error)
     }
 })
+
+
 
 export default roomsRouter;
