@@ -1,10 +1,14 @@
 
 import  dotenv  from 'dotenv';
+import { disconnect } from 'mongoose';
 import { io } from './../server.js';
 
 dotenv.config();
 
-const users = []
+let roomID = ''
+let peerID = ''
+let currentPeerID = ''
+let users = []
 
 export const newConnectionHandler = socket => {
     
@@ -13,38 +17,46 @@ export const newConnectionHandler = socket => {
     console.log("New connection:", socketID)
     
     socket.emit("clientId", socketID)
+    
 
     socket.on('join-room', payload => {
-        const roomID = payload.roomID
-
-        socket.join(payload.roomEndpoint)
-        socket.to(payload.roomEndpoint).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID})
-        
-        if(users.find(user => user === payload.userID) === undefined){
-            users.push(payload.userID)
-            console.log("userssssssss after join", users)
-        }
-        socket.broadcast.emit("user-join", {users});
-        
+        peerID = payload.peerID
+        roomID = payload.roomID
+        currentPeerID = payload.peerID
+        socket.join(payload.roomID);
+        users.push(payload.userID)
+        socket.to(payload.roomID).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID, users})
+                
         socket.on("disconnect", () => {
-            console.log("Client disconnected, socketID:" , socketID, "peerID: ", payload.peerID);
-            // socket.to(roomEndpoint).emit('user-disconnect', {socketID: socketID, peerID: currentPeerID}); 
-            leaveRoom(payload.peerID, payload.roomEndpoint, payload.userID)
-            
-            const index = users.findIndex(user => user === payload.userID)
-            users.splice(index,1)
-            socket.emit("user-left", {peerID: payload.peerID, userID: payload.userID, users, roomID})
-            console.log("users after left", users)
+            console.log("Client disconnected, socketID:" , socketID, "peerID: ", payload.peerID)
+            // socket.to(roomID).emit('user-disconnect', {socketID: socketID, peerID: currentPeerID}); 
+            users.filter(user => user !== payload.userID)
+            leaveRoom(payload.peerID, payload.roomID, payload.userID)
+        
         })
 
-
-        const leaveRoom =(peerID, roomEndpoint, userID) => {
-            //todo: filter updated rooms
-            console.log("user-disconnected: userID", userID)
-            socket.to(roomEndpoint).emit('user-disconnected', {peerID: peerID, userID: userID, users})
-             
+        //********chat messaging are *************/
+        // let chatHistory = [];
+        // socket.on("send-message", payload => {
+        //     console.log("send message triggeres, payload =>" ,payload)
             
+        //     socket.to(roomID).emit('get-sended-message', {newMessage: payload.newMessage, chat: payload.chat})
+        // })
+
+        socket.on("chatMessage", (newMessage) => {
+            // console.log(text)
+            socket.emit('message', newMessage);
+            socket.to(payload.roomID).emit('message', newMessage)
         }
+        )
+
+        
     })
+    const leaveRoom =(peerID, roomID,userID) => {
+        //todo: filter updated rooms
+        socket.to(roomID).emit('user-disconnected', {peerID: peerID, roomID, userID: userID})
+        
+    }
+
     
 }

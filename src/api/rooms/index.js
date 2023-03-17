@@ -15,22 +15,31 @@ roomsRouter.post("/", async (req, res, next) => {
     }
 })
 
+
+
 //get all rooms
 roomsRouter.get("/", async (req, res, next) => {
     try {
-        const rooms = await RoomsModel.find();
+        // if(req.body.endpoint) {
+        //     const rooms = await RoomsModel.find({endpoint: req.body.endpoint});
+        //     res.send(rooms)
+        // }
+        
+        const rooms = await RoomsModel.find(req.query);
         res.send(rooms)
+
         
     } catch (error) {
         next(error)
     }
 })
 
+
 //get a room with id
 roomsRouter.get("/:roomID", async (req, res, next) => {
     try {
         const room = await RoomsModel.findById(req.params.roomID);
-
+        
         if(room){
             res.send(room)
         }else {
@@ -41,6 +50,19 @@ roomsRouter.get("/:roomID", async (req, res, next) => {
         next(error)
     }
 })
+
+
+//get the room with roomEndpoint
+roomsRouter.get("/endpoint/:roomEndpoint", async (req, res, next) => {
+    try {
+        const rooms = await RoomsModel.find({endpoint: req.params.roomEndpoint});
+        res.send(rooms)
+        
+    } catch (error) {
+        next(error)
+    }
+})
+
 //edit a room with id
 roomsRouter.put("/:roomID", async (req, res, next) => {
     try {
