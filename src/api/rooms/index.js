@@ -3,7 +3,7 @@ import RoomsModel from "./model.js"
 import createHttpError from 'http-errors';
 
 const roomsRouter = express.Router()
-
+    
 //create a new room
 roomsRouter.post("/", async (req, res, next) => {
     try {
@@ -62,6 +62,7 @@ roomsRouter.get("/endpoint/:roomEndpoint", async (req, res, next) => {
         next(error)
     }
 })
+
 //edit a room with id
 roomsRouter.put("/:roomID", async (req, res, next) => {
     try {
@@ -91,5 +92,7 @@ roomsRouter.delete("/:roomID", async (req, res, next) => {
         next(error)
     }
 })
+
+
 
 export default roomsRouter;

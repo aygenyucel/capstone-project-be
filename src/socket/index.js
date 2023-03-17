@@ -12,7 +12,6 @@ let users = []
 
 export const newConnectionHandler = socket => {
     
-    
     const socketID = socket.id;
     
     console.log("New connection:", socketID)
@@ -61,4 +60,3 @@ export const newConnectionHandler = socket => {
 
     
 }
-
