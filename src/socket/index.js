@@ -49,9 +49,16 @@ export const newConnectionHandler = socket => {
             // console.log(text)
             socket.emit('message', newMessage);
             socket.to(payload.roomEndpoint).emit('message', newMessage)
+            socket.to(payload.roomEndpoint).emit('new-message-alert', newMessage)
+            
         }
         )
 
+        
+
+        socket.on("kick-user", payload =>
+            socket.to(payload.roomEndpoint).emit("you-kicked", {userID: payload.userID})
+        )
         
     })
     const leaveRoom =(peerID, roomID,userID) => {

@@ -16,17 +16,31 @@ roomsRouter.post("/", async (req, res, next) => {
 })
 
 
+roomsRouter.get("/search", async(req,res,next) => {
+    try {
+        
+        const rooms = await RoomsModel.find(req.query)
+        .skip(req.query.skip)
+            .limit(req.query.limit)
+            .sort({"createdAt": -1});
+        res.send(rooms)
+    } catch (error) {
+        next(error)
+    }
+    
+})
 
 //get all rooms
 roomsRouter.get("/", async (req, res, next) => {
     try {
-        // if(req.body.endpoint) {
-        //     const rooms = await RoomsModel.find({endpoint: req.body.endpoint});
-        //     res.send(rooms)
-        // }
         
-        const rooms = await RoomsModel.find(req.query);
-        res.send(rooms)
+            const rooms = await RoomsModel.find({})
+            .skip(req.query.skip)
+            .limit(req.query.limit)
+            .sort({"createdAt": -1});
+            res.send(rooms)
+        
+        
 
         
     } catch (error) {
