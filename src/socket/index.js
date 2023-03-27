@@ -9,6 +9,7 @@ let roomID = ''
 let peerID = ''
 let currentPeerID = ''
 let users = []
+let roomEndpoint = ''
 
 export const newConnectionHandler = socket => {
     
@@ -23,10 +24,11 @@ export const newConnectionHandler = socket => {
         peerID = payload.peerID
         roomID = payload.roomID
         currentPeerID = payload.peerID
-        socket.join(payload.roomID);
+        roomEndpoint = payload.roomEndpoint;
+        socket.join(payload.roomEndpoint);
         users.push(payload.userID)
-        socket.to(payload.roomID).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID, users})
-                
+        socket.to(payload.roomEndpoint).emit('user-connected', {peerID: payload.peerID, socketID: socketID, userID: payload.userID, users, roomID, roomEndpoint})
+        socket.emit("roomID", payload.roomID)     
         socket.on("disconnect", () => {
             console.log("Client disconnected, socketID:" , socketID, "peerID: ", payload.peerID)
             // socket.to(roomID).emit('user-disconnect', {socketID: socketID, peerID: currentPeerID}); 
@@ -46,15 +48,22 @@ export const newConnectionHandler = socket => {
         socket.on("chatMessage", (newMessage) => {
             // console.log(text)
             socket.emit('message', newMessage);
-            socket.to(payload.roomID).emit('message', newMessage)
+            socket.to(payload.roomEndpoint).emit('message', newMessage)
+            socket.to(payload.roomEndpoint).emit('new-message-alert', newMessage)
+            
         }
         )
 
         
+
+        socket.on("kick-user", payload =>
+            socket.to(payload.roomEndpoint).emit("you-kicked", {userID: payload.userID})
+        )
+        
     })
     const leaveRoom =(peerID, roomID,userID) => {
         //todo: filter updated rooms
-        socket.to(roomID).emit('user-disconnected', {peerID: peerID, roomID, userID: userID})
+        socket.to(roomEndpoint).emit('user-disconnected', {peerID: peerID, roomID, userID: userID})
         
     }
 
